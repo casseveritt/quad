@@ -40,17 +40,11 @@ int main(int /*argc*/, char** /*argv*/) {
 
   Matrix4f camFromClipM = clipFromCamM.Inverted();
 
-  //PrintMatrix("I", clipFromCamM * camFromClipM);
-  //printf("\n");
-  //PrintMatrix("I", quadFromCamM * camFromClipM * clipFromCamM * camFromQuadM);
-
   // Planes are transformed by the inverse transpose of the transforms that transform points.
   // This transforms the forward XY plane at the origin in quad space into
   // camera space.
   // That plane is then used to replace the z row of the projection matrix.
   Vec4f quadPlaneInCam = quadFromCamM.Transposed() * Vec4f(0, 0, 1, 0);
-
-  //PrintPoint("quadPlaneInCam", quadPlaneInCam);
 
   Matrix4f newClipFromCamM = clipFromCamM;
   for (int i = 0; i < 4; i++) {
@@ -58,28 +52,17 @@ int main(int /*argc*/, char** /*argv*/) {
   }
 
   Matrix4f camFromNewClipM = newClipFromCamM.Inverted();
-
-  //PrintPoint("quad(cam(newclip(cam(quad(zero)))))",
-  //           quadFromCamM * camFromNewClipM * newClipFromCamM * camFromQuadM * Vec3f(0, 0, 0));
+  Matrix4f quadFromNewClipM = quadFromCamM * camFromNewClipM;
 
     for (int j = 0; j < height; j++) {
       for (int i = 0; i < width; i++) {
         Vec4f clipPoint(2 * i / float(width - 1) - 1.0f, 2 * j / float(height - 1) - 1.0f, -1, 1);
-        //PrintPoint( "clipPoint", clipPoint);
-        Vec4f camPoint = camFromNewClipM * clipPoint;
-        //PrintPoint( "camPoint h", camPoint);
-        Vec4f camPointR = camPoint;
-        camPointR /= camPointR.w;
-        //PrintPoint( "camPoint r", camPointR);
-        Vec4f quadPoint = quadFromCamM * camPointR;
-        //PrintPoint( "quadPoint r", quadPoint);
+        Vec4f quadPoint = quadFromNewClipM * clipPoint;
         bool inside = ((-quadPoint.w < quadPoint.x && quadPoint.x < quadPoint.w) && (-quadPoint.w < quadPoint.y && quadPoint.y < quadPoint.w));
         printf("%s", inside ? "." : " ");
       }
       printf("\n");
     }
-
-  //PrintPoint("quadPlaneInCam", quadPlaneInCam);
 
   return 0;
 }
