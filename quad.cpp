@@ -22,7 +22,7 @@ int main(int /*argc*/, char** /*argv*/) {
   Posef worldFromCam;
 
   // turn the quad around so its -z is pointing toward the camera
-  worldFromQuad.r = Quaternionf(Vec3f(0, 1, 0), ToRadians(0.0f));
+  worldFromQuad.r = Quaternionf(Vec3f(0.5f, 1, 0), ToRadians(135.0f));
   worldFromQuad.t = Vec3f(0, 0, -4.0f);
 
   worldFromCam.t = Vec3f(0, 0, 1.0f);
@@ -35,7 +35,7 @@ int main(int /*argc*/, char** /*argv*/) {
 
   constexpr int width = 80;
   constexpr int height = 40;
-  Matrix4f clipFromCamM = Perspective(60.0f, float(width) / height, 1.0f, 10.0f);
+  Matrix4f clipFromCamM = Perspective(60.0f,  (width * 0.25f) / height, 1.0f, 10.0f);
   Matrix4f clipFromQuadM = clipFromCamM * camFromQuadM;
 
   Matrix4f camFromClipM = clipFromCamM.Inverted();
@@ -44,9 +44,13 @@ int main(int /*argc*/, char** /*argv*/) {
   //printf("\n");
   //PrintMatrix("I", quadFromCamM * camFromClipM * clipFromCamM * camFromQuadM);
 
+  // Planes are transformed by the inverse transpose of the transforms that transform points.
+  // This transforms the forward XY plane at the origin in quad space into
+  // camera space.
+  // That plane is then used to replace the z row of the projection matrix.
   Vec4f quadPlaneInCam = quadFromCamM.Transposed() * Vec4f(0, 0, 1, 0);
 
-  PrintPoint("quadPlaneInCam", quadPlaneInCam);
+  //PrintPoint("quadPlaneInCam", quadPlaneInCam);
 
   Matrix4f newClipFromCamM = clipFromCamM;
   for (int i = 0; i < 4; i++) {
@@ -55,8 +59,8 @@ int main(int /*argc*/, char** /*argv*/) {
 
   Matrix4f camFromNewClipM = newClipFromCamM.Inverted();
 
-  PrintPoint("quad(cam(newclip(cam(quad(zero)))))",
-             quadFromCamM * camFromNewClipM * newClipFromCamM * camFromQuadM * Vec3f(0, 0, 0));
+  //PrintPoint("quad(cam(newclip(cam(quad(zero)))))",
+  //           quadFromCamM * camFromNewClipM * newClipFromCamM * camFromQuadM * Vec3f(0, 0, 0));
 
     for (int j = 0; j < height; j++) {
       for (int i = 0; i < width; i++) {
@@ -75,7 +79,7 @@ int main(int /*argc*/, char** /*argv*/) {
       printf("\n");
     }
 
-  PrintPoint("quadPlaneInCam", quadPlaneInCam);
+  //PrintPoint("quadPlaneInCam", quadPlaneInCam);
 
   return 0;
 }
