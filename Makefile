@@ -5,7 +5,7 @@ $(info UNAME is $(UNAME))
 WARNFLAGS := -Wall -Wextra -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2 -Winit-self -Wmissing-declarations -Wmissing-include-dirs -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow  -Wsign-promo -Wstrict-overflow=5 -Wswitch-default -Wundef
 
 CFLAGS_NOWARN := -g -std=c++11
-CFLAGS := $(CFLAGS_NOWARN) $(WARNFLAGS)
+CFLAGS := $(CFLAGS_NOWARN) #$(WARNFLAGS)
 
 
 all: quad

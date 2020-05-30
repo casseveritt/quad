@@ -945,10 +945,10 @@ class Matrix3 {
         m3.m[row][col] = ((row + col) & 0x1) ? -t : t;
       }
     }
-    return m3.Transpose();
+    return m3.Transposed();
   }
 
-  Matrix3 Transpose() const {
+  Matrix3 Transposed() const {
     Matrix3 m3;
     m3.m[0][0] = m[0][0];
     m3.m[1][0] = m[0][1];
@@ -1297,7 +1297,7 @@ class Matrix4 {
     return minv;
   }
 
-  Matrix4 Transpose() const {
+  Matrix4 Transposed() const {
     Matrix4 mtrans;
 
     for (int i = 0; i < 4; i++) {
@@ -2020,7 +2020,7 @@ class Plane {
 
   void Transform(const Matrix4<T>& matrix) {
     Matrix4<T> invtr = matrix.Inverted();
-    invtr = invtr.Transpose();
+    invtr = invtr.Transposed();
 
     Vec3<T> pntOnPlane = planenormal * planedistance;
     Vec3<T> newPntOnPlane;
