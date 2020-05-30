@@ -33,9 +33,9 @@ int main(int /*argc*/, char** /*argv*/) {
   Matrix4f camFromQuadM = camFromWorldM * worldFromQuadM;
   Matrix4f quadFromCamM = camFromQuadM.Inverted();
 
-  constexpr int width = 2;
-  constexpr int height = 2;
-  Matrix4f clipFromCamM = Perspective(0.1f, float(width) / height, 1.0f, 10.0f);
+  constexpr int width = 80;
+  constexpr int height = 40;
+  Matrix4f clipFromCamM = Perspective(60.0f, float(width) / height, 1.0f, 10.0f);
   Matrix4f clipFromQuadM = clipFromCamM * camFromQuadM;
 
   Matrix4f camFromClipM = clipFromCamM.Inverted();
@@ -61,16 +61,16 @@ int main(int /*argc*/, char** /*argv*/) {
     for (int j = 0; j < height; j++) {
       for (int i = 0; i < width; i++) {
         Vec4f clipPoint(2 * i / float(width - 1) - 1.0f, 2 * j / float(height - 1) - 1.0f, -1, 1);
-        PrintPoint( "clipPoint", clipPoint);
+        //PrintPoint( "clipPoint", clipPoint);
         Vec4f camPoint = camFromNewClipM * clipPoint;
-        PrintPoint( "camPoint h", camPoint);
+        //PrintPoint( "camPoint h", camPoint);
         Vec4f camPointR = camPoint;
         camPointR /= camPointR.w;
-        PrintPoint( "camPoint r", camPointR);
+        //PrintPoint( "camPoint r", camPointR);
         Vec4f quadPoint = quadFromCamM * camPointR;
-        PrintPoint( "quadPoint r", quadPoint);
-        //bool inside = ((-1.0 < qclipPoint.x && qclipPoint.x < 1.0) && (-1.0 < qclipPoint.y && qclipPoint.y < 1.0));
-        //printf("%s", inside ? "." : " ");
+        //PrintPoint( "quadPoint r", quadPoint);
+        bool inside = ((-quadPoint.w < quadPoint.x && quadPoint.x < quadPoint.w) && (-quadPoint.w < quadPoint.y && quadPoint.y < quadPoint.w));
+        printf("%s", inside ? "." : " ");
       }
       printf("\n");
     }
