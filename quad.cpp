@@ -42,18 +42,8 @@ Matrix4f computeClipFromQuad( int width, int height ) {
   return clipFromQuadM;
 }
 
-void AdjustForQuadPlane( Matrix4f & clipFromQuadM, Matrix4f & quadFromClipM) {
-  // Planes are transformed by the inverse transpose of the transforms that transform points.
-  // This transforms the forward XY plane at the origin in quad space into
-  // clip space.
-  // That plane is then used to replace the z row of the matrix.
-  Vec4f quadPlaneInClip = quadFromClipM.Transposed() * Vec4f(0, 0, 1, 0);
-
-  for (int i = 0; i < 4; i++) {
-    clipFromQuadM.el(2, i) = quadPlaneInClip.v[i];
-  }
-
-  quadFromClipM = clipFromQuadM.Inverted();  
+void AdjustForwardTransform( Matrix4f & clipFromQuadM) {
+  clipFromQuadM.SetRow(2, Vec4f( 0, 0, 1, 0 ) );
 }
 
 
@@ -62,9 +52,10 @@ int main(int /*argc*/, char** /*argv*/) {
   constexpr int height = 480;
 
   Matrix4f clipFromQuadM = computeClipFromQuad( width, height );
-  Matrix4f quadFromClipM = clipFromQuadM.Inverted();
 
-  AdjustForQuadPlane( clipFromQuadM, quadFromClipM );
+  AdjustForwardTransform( clipFromQuadM );
+
+  Matrix4f quadFromClipM = clipFromQuadM.Inverted();
 
   unsigned char* img = new unsigned char[width * height * 3];
   bzero( img, width * height * 3);
