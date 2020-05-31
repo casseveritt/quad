@@ -19,7 +19,7 @@ static void PrintMatrix(const char* label, const Matrix4f& m) {
   }
 }
 
-Matrix4f computeClipFromQuad( int width, int height ) {
+Matrix4f computeClipFromQuad() {
 
   Posef worldFromQuad;
   Posef worldFromCam;
@@ -36,33 +36,37 @@ Matrix4f computeClipFromQuad( int width, int height ) {
   Matrix4f camFromQuadM = camFromWorldM * worldFromQuadM;
   Matrix4f quadFromCamM = camFromQuadM.Inverted();
 
-  Matrix4f clipFromCamM = Perspective(60.0f, (width * 1.0f) / height, 1.0f, 10.0f);
+  Matrix4f clipFromCamM = Perspective(90.0f, 1.0f, 1.0f, 10.0f);
   Matrix4f clipFromQuadM = clipFromCamM * camFromQuadM;
 
   return clipFromQuadM;
 }
 
 void AdjustForwardTransform( Matrix4f & clipFromQuadM) {
+  // We force the transform from quad space to clip space to leave
+  // z unaltered. This ensures the inverse transform transforms
+  // back into that plane.
   clipFromQuadM.SetRow(2, Vec4f( 0, 0, 1, 0 ) );
 }
 
 
 int main(int /*argc*/, char** /*argv*/) {
-  constexpr int width = 640;
-  constexpr int height = 480;
-
-  Matrix4f quadFromClipM = [&]() {
-    Matrix4f clipFromQuadM = computeClipFromQuad( width, height );
+  Matrix4f quadFromClipM = []() {
+    Matrix4f clipFromQuadM = computeClipFromQuad();
     AdjustForwardTransform( clipFromQuadM );
     return clipFromQuadM.Inverted();
   }();
+
+  constexpr int width = 640;
+  constexpr int height = 480;
+  constexpr float aspect = float(width)/height;
 
   unsigned char* img = new unsigned char[width * height * 3];
   bzero( img, width * height * 3);
 
   for (int j = 0; j < height; j++) {
     for (int i = 0; i < width; i++) {
-      Vec4f clipPoint(2 * i / float(width - 1) - 1.0f, 2 * j / float(height - 1) - 1.0f, 0, 1);
+      Vec4f clipPoint( aspect * (2 * i / float(width - 1) - 1.0f), 2 * j / float(height - 1) - 1.0f, 0, 1);
       Vec4f quadPoint = quadFromClipM * clipPoint;
       quadPoint /= quadPoint.w;
 
