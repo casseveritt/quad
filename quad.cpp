@@ -22,7 +22,7 @@ int main(int /*argc*/, char** /*argv*/) {
   Posef worldFromCam;
 
   // turn the quad around so its -z is pointing toward the camera
-  worldFromQuad.r = Quaternionf(Vec3f(0.5f, 1, 0), ToRadians(135.0f));
+  worldFromQuad.r = Quaternionf(Vec3f(0.0f, 1, 0), ToRadians(40.0f));
   worldFromQuad.t = Vec3f(0, 0, -4.0f);
 
   worldFromCam.t = Vec3f(0, 0, 1.0f);
@@ -35,34 +35,32 @@ int main(int /*argc*/, char** /*argv*/) {
 
   constexpr int width = 80;
   constexpr int height = 40;
-  Matrix4f clipFromCamM = Perspective(60.0f,  (width * 0.25f) / height, 1.0f, 10.0f);
+  Matrix4f clipFromCamM = Perspective(60.0f, (width * 0.25f) / height, 1.0f, 10.0f);
   Matrix4f clipFromQuadM = clipFromCamM * camFromQuadM;
-
-  Matrix4f camFromClipM = clipFromCamM.Inverted();
+  Matrix4f quadFromClipM = clipFromQuadM.Inverted();
 
   // Planes are transformed by the inverse transpose of the transforms that transform points.
   // This transforms the forward XY plane at the origin in quad space into
   // camera space.
   // That plane is then used to replace the z row of the projection matrix.
-  Vec4f quadPlaneInCam = quadFromCamM.Transposed() * Vec4f(0, 0, 1, 0);
+  Vec4f quadPlaneInClip = quadFromClipM.Transposed() * Vec4f(0, 0, 1, 0);
 
-  Matrix4f newClipFromCamM = clipFromCamM;
   for (int i = 0; i < 4; i++) {
-    newClipFromCamM.el(2, i) = quadPlaneInCam.v[i] - newClipFromCamM.el(3, i);
+    clipFromQuadM.el(2, i) = quadPlaneInClip.v[i] - clipFromQuadM.el(3, i);
   }
 
-  Matrix4f camFromNewClipM = newClipFromCamM.Inverted();
-  Matrix4f quadFromNewClipM = quadFromCamM * camFromNewClipM;
+  quadFromClipM = clipFromQuadM.Inverted();
 
-    for (int j = 0; j < height; j++) {
-      for (int i = 0; i < width; i++) {
-        Vec4f clipPoint(2 * i / float(width - 1) - 1.0f, 2 * j / float(height - 1) - 1.0f, -1, 1);
-        Vec4f quadPoint = quadFromNewClipM * clipPoint;
-        bool inside = ((-quadPoint.w < quadPoint.x && quadPoint.x < quadPoint.w) && (-quadPoint.w < quadPoint.y && quadPoint.y < quadPoint.w));
-        printf("%s", inside ? "." : " ");
-      }
-      printf("\n");
+  for (int j = 0; j < height; j++) {
+    for (int i = 0; i < width; i++) {
+      Vec4f clipPoint(2 * i / float(width - 1) - 1.0f, 2 * j / float(height - 1) - 1.0f, -1, 1);
+      Vec4f quadPoint = quadFromClipM * clipPoint;
+      bool inside = ((-quadPoint.w < quadPoint.x && quadPoint.x < quadPoint.w) &&
+                     (-quadPoint.w < quadPoint.y && quadPoint.y < quadPoint.w));
+      printf("%s", inside ? "." : " ");
     }
+    printf("\n");
+  }
 
   return 0;
 }
