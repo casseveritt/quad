@@ -17,7 +17,8 @@ static void PrintMatrix(const char* label, const Matrix4f& m) {
   }
 }
 
-int main(int /*argc*/, char** /*argv*/) {
+Matrix4f computeClipFromQuad( int width, int height ) {
+
   Posef worldFromQuad;
   Posef worldFromCam;
 
@@ -33,23 +34,37 @@ int main(int /*argc*/, char** /*argv*/) {
   Matrix4f camFromQuadM = camFromWorldM * worldFromQuadM;
   Matrix4f quadFromCamM = camFromQuadM.Inverted();
 
-  constexpr int width = 80;
-  constexpr int height = 40;
   Matrix4f clipFromCamM = Perspective(60.0f, (width * 0.25f) / height, 1.0f, 10.0f);
   Matrix4f clipFromQuadM = clipFromCamM * camFromQuadM;
-  Matrix4f quadFromClipM = clipFromQuadM.Inverted();
+
+  return clipFromQuadM;
+}
+
+void AdjustForQuadPlane( Matrix4f & clipFromQuadM, Matrix4f & quadFromClipM) {
 
   // Planes are transformed by the inverse transpose of the transforms that transform points.
   // This transforms the forward XY plane at the origin in quad space into
-  // camera space.
-  // That plane is then used to replace the z row of the projection matrix.
+  // clip space.
+  // That plane is then used to replace the z row of the matrix.
   Vec4f quadPlaneInClip = quadFromClipM.Transposed() * Vec4f(0, 0, 1, 0);
 
   for (int i = 0; i < 4; i++) {
     clipFromQuadM.el(2, i) = quadPlaneInClip.v[i] - clipFromQuadM.el(3, i);
   }
 
-  quadFromClipM = clipFromQuadM.Inverted();
+  quadFromClipM = clipFromQuadM.Inverted();  
+
+}
+
+
+int main(int /*argc*/, char** /*argv*/) {
+  constexpr int width = 80;
+  constexpr int height = 40;
+
+  Matrix4f clipFromQuadM = computeClipFromQuad( width, height );
+  Matrix4f quadFromClipM = clipFromQuadM.Inverted();
+
+  AdjustForQuadPlane( clipFromQuadM, quadFromClipM );
 
   for (int j = 0; j < height; j++) {
     for (int i = 0; i < width; i++) {
