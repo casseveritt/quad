@@ -64,10 +64,9 @@ int main(int /*argc*/, char** /*argv*/) {
     AdjustForwardTransform( clipFromQuadM );
     Matrix4f quadFromClipM = clipFromQuadM.Inverted();
     // We don't care about the z coordinate, so zero row and col 2
-    Vec4f z;
-    z *= 0;
-    quadFromClipM.SetRow(2, z);
-    quadFromClipM.SetColumn(2, z);
+    Vec4f zero(0,0,0,0);
+    quadFromClipM.SetRow(2, zero);
+    quadFromClipM.SetColumn(2, zero);
     return quadFromClipM;
   }();
 
