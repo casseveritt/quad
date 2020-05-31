@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <strings.h>
+#include <string.h>
 #include "linear.h"
 #include "stb.h"
 
@@ -14,10 +15,17 @@ static void PrintPoint(const char* label, const Vec3f& p) {
 }
 
 static void PrintMatrix(const char* label, const Matrix4f& m) {
+  const char *empty = "";
+  char fmt[128];
+  int ll = strlen(label);
+  sprintf(fmt, "%%%ds %%d | %%8.3f %%8.3f %%8.3f %%8.3f |\n", ll);
   for (int i = 0; i < 4; i++) {
-    printf("%s %d | %8.3f %8.3f %8.3f %8.3f |\n", label, i, m.el(i, 0), m.el(i, 1), m.el(i, 2), m.el(i, 3));
+    printf(fmt, i == 0 ? label : empty, i, m.el(i, 0), m.el(i, 1), m.el(i, 2), m.el(i, 3));
   }
 }
+
+#define PP(p) PrintPoint(#p, p)
+#define PM(m) PrintMatrix(#m, m)
 
 Matrix4f computeClipFromQuad() {
 
@@ -57,6 +65,8 @@ int main(int /*argc*/, char** /*argv*/) {
     return clipFromQuadM.Inverted();
   }();
 
+  PM(quadFromClipM);
+
   constexpr int width = 640;
   constexpr int height = 480;
   constexpr float aspect = float(width)/height;
@@ -68,6 +78,10 @@ int main(int /*argc*/, char** /*argv*/) {
     for (int i = 0; i < width; i++) {
       Vec4f clipPoint( aspect * (2 * i / float(width - 1) - 1.0f), 2 * j / float(height - 1) - 1.0f, 0, 1);
       Vec4f quadPoint = quadFromClipM * clipPoint;
+      if (i == (width/2) && j == (height/2)) {
+        PP(clipPoint);
+        PP(quadPoint);
+      }
       quadPoint /= quadPoint.w;
 
       bool inside = ((-quadPoint.w < quadPoint.x && quadPoint.x < quadPoint.w) &&
