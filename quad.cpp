@@ -51,11 +51,11 @@ int main(int /*argc*/, char** /*argv*/) {
   constexpr int width = 640;
   constexpr int height = 480;
 
-  Matrix4f clipFromQuadM = computeClipFromQuad( width, height );
-
-  AdjustForwardTransform( clipFromQuadM );
-
-  Matrix4f quadFromClipM = clipFromQuadM.Inverted();
+  Matrix4f quadFromClipM = [&]() {
+    Matrix4f clipFromQuadM = computeClipFromQuad( width, height );
+    AdjustForwardTransform( clipFromQuadM );
+    return clipFromQuadM.Inverted();
+  }();
 
   unsigned char* img = new unsigned char[width * height * 3];
   bzero( img, width * height * 3);
