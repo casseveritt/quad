@@ -4,7 +4,7 @@ $(info UNAME is $(UNAME))
 
 WARNFLAGS := -Wall -Wextra -Wcast-align -Wcast-qual -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2 -Winit-self -Wmissing-declarations -Wmissing-include-dirs -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wshadow  -Wsign-promo -Wstrict-overflow=5 -Wswitch-default -Wundef
 
-CFLAGS_NOWARN := -g -std=c++11
+CFLAGS_NOWARN := -g -isystem stb -std=c++11
 CFLAGS := $(CFLAGS_NOWARN) #$(WARNFLAGS)
 
 
@@ -19,8 +19,11 @@ OBJ := $(patsubst %.cpp, %.o, $(SRC))
 .cpp.o:
 	g++ $(CFLAGS) $< -c
 
-quad: $(OBJ) $(H)
-	g++ $(CFLAGS) $(OBJ) -o quad 
+quad: $(OBJ) $(H) stb.o
+	g++ $(CFLAGS) $(OBJ) stb.o -o quad 
+
+stb.o: stb.cpp
+	g++ $(CFLAGS_NOWARN) stb.cpp -c
 
 format: format_h format_cpp
 
