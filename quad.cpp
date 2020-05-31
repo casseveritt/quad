@@ -33,8 +33,8 @@ Matrix4f computeClipFromQuad() {
   Posef worldFromCam;
 
   // turn the quad around so its -z is pointing toward the camera
-  worldFromQuad.r = Quaternionf(Vec3f(0.0f, 1, 0), ToRadians(60.0f));
-  worldFromQuad.t = Vec3f(2.0f, 1.0f, -2.0f);
+  worldFromQuad.r = Quaternionf(Vec3f(0.25f, 1, 0), ToRadians(60.0f));
+  worldFromQuad.t = Vec3f(0.5f, 0.1f, -1.0f);
 
   worldFromCam.t = Vec3f(0, 0, 1.0f);
 
