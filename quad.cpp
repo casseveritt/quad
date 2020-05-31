@@ -34,7 +34,7 @@ Matrix4f computeClipFromQuad() {
 
   // turn the quad around so its -z is pointing toward the camera
   worldFromQuad.r = Quaternionf(Vec3f(0.0f, 1, 0), ToRadians(60.0f));
-  worldFromQuad.t = Vec3f(0, 0, -2.0f);
+  worldFromQuad.t = Vec3f(2.0f, 1.0f, -2.0f);
 
   worldFromCam.t = Vec3f(0, 0, 1.0f);
 
@@ -62,7 +62,13 @@ int main(int /*argc*/, char** /*argv*/) {
   Matrix4f quadFromClipM = []() {
     Matrix4f clipFromQuadM = computeClipFromQuad();
     AdjustForwardTransform( clipFromQuadM );
-    return clipFromQuadM.Inverted();
+    Matrix4f quadFromClipM = clipFromQuadM.Inverted();
+    // We don't care about the z coordinate, so zero row and col 2
+    Vec4f z;
+    z *= 0;
+    quadFromClipM.SetRow(2, z);
+    quadFromClipM.SetColumn(2, z);
+    return quadFromClipM;
   }();
 
   PM(quadFromClipM);
@@ -76,7 +82,7 @@ int main(int /*argc*/, char** /*argv*/) {
 
   for (int j = 0; j < height; j++) {
     for (int i = 0; i < width; i++) {
-      Vec4f clipPoint( aspect * (2 * i / float(width - 1) - 1.0f), 2 * j / float(height - 1) - 1.0f, 0, 1);
+      Vec4f clipPoint( aspect * (2 * i / float(width - 1) - 1.0f), 2 * j / float(height - 1) - 1.0f, 1234.5f /*don't care*/, 1);
       Vec4f quadPoint = quadFromClipM * clipPoint;
       if (i == (width/2) && j == (height/2)) {
         PP(clipPoint);
